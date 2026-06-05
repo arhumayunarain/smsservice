@@ -122,6 +122,17 @@ Full documentation lives in [`docs/`](./docs/README.md):
 
 [MIT](./LICENSE)
 
+## Author
+
+**Humayun Arain** — founding team member and technical lead at Alt Academy, where he built the platform, internal dashboard, and AI tutors from the ground up and runs the product, finance, and growth functions. He builds full-stack products (NestJS, Next.js, mobile) and ships AI-powered tools.
+
+## Contact
+
+- 🌐 Website — [humayunarain.com](https://humayunarain.com)
+- 💼 LinkedIn — [linkedin.com/in/humayunarain](https://www.linkedin.com/in/humayunarain/)
+- ✉️ Email — [ar.humayunarain@gmail.com](mailto:ar.humayunarain@gmail.com)
+- 📸 Instagram — [@humayun.codes](https://instagram.com/humayun.codes)
+
 ---
 
 Built and open-sourced by [@humayun.codes](https://instagram.com/humayun.codes).

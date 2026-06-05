@@ -1,6 +1,6 @@
 # SMSService
 
-A self-hosted bulk SMS platform that turns your own Android phones into SMS gateways. Create campaigns, import recipients from CSV or Google Sheets, send through connected devices (or an SMS API provider), and track delivery in real time from a web dashboard.
+A self-hosted bulk SMS platform that sends through your own Android phones **or** the [Outreach.pk](https://outreach.pk) SMS API. Create campaigns, import recipients from CSV or Google Sheets, send via connected devices or the Outreach.pk gateway, and track delivery in real time from a web dashboard.
 
 > Built for businesses that want to send bulk SMS over their own SIM cards instead of paying per-message gateway fees — with full control over data and delivery.
 
@@ -10,7 +10,7 @@ A self-hosted bulk SMS platform that turns your own Android phones into SMS gate
 - 🚀 **Campaigns** — build, schedule, and run bulk campaigns with templates and personalization
 - 📊 **Live tracking** — real-time delivery status and campaign progress over WebSockets
 - 📥 **Recipient import** — bring contacts in from CSV files or Google Sheets
-- 🔀 **Multiple send methods** — send via connected devices or via an SMS API provider
+- 🔀 **Two send methods** — send via connected Android devices **or** the [Outreach.pk](https://outreach.pk) SMS API (bulk SMS, no hardware needed)
 - 🔁 **Reliable queue** — BullMQ-backed sending with configurable throttling to avoid bulk-SMS limits
 - 🔐 **Auth** — JWT-based admin login and API-key access for devices
 - 🐳 **Self-hostable** — ships with Docker Compose and an Nginx reverse-proxy config
@@ -57,7 +57,7 @@ Then fill in `.env`:
 - `JWT_SECRET` — a long random string
 - `ADMIN_USERNAME` / `ADMIN_PASSWORD` — your dashboard login
 - `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` — only if you want Google Sheets import
-- `OUTREACH_*` — only if you want to send via an SMS API provider instead of / alongside devices
+- `OUTREACH_API_ID` / `OUTREACH_API_PASS` / `OUTREACH_MASK` — to send bulk SMS via the [Outreach.pk](https://outreach.pk) API (instead of / alongside devices)
 
 > ⚠️ Never commit your real `.env`. It is gitignored by default.
 
@@ -90,10 +90,33 @@ Dashboard runs at `http://localhost:3001`, API at `http://localhost:3000`.
 
 Build/install the Android app from `android/`, open it, and pair it to your backend using an API key generated from the dashboard.
 
-## Configuration notes
+## Sending bulk SMS via Outreach.pk
 
-- **Send throttling** — a small delay between messages avoids the Android bulk-SMS confirmation dialog. Tune it in settings.
-- **Send method** — campaigns can route through connected devices or an SMS API provider.
+No Android phone? Send bulk SMS through the [Outreach.pk](https://outreach.pk) gateway. Set the `OUTREACH_*` env vars, then:
+
+```bash
+curl -X POST http://localhost:3000/sms/send \
+  -H "Content-Type: application/json" \
+  -d '{"recipient":"923001234567,923009876543","body":"Hello from SMSService"}'
+```
+
+For templated, scheduled, trackable bulk sends, create a campaign with `sendVia: "API"`. Full guide: **[docs/outreach-sms.md](./docs/outreach-sms.md)**.
+
+## Documentation
+
+Full documentation lives in [`docs/`](./docs/README.md):
+
+- [Getting Started](./docs/getting-started.md) — install & run (local + Docker)
+- [Configuration](./docs/configuration.md) — every env var + security checklist
+- [Sending SMS](./docs/sending-sms.md) — the two send methods
+- [Bulk SMS with Outreach.pk](./docs/outreach-sms.md) — step-by-step bulk sending
+- [Campaigns](./docs/campaigns.md) — templates, lists, scheduling, tracking
+- [Android Gateway](./docs/android-gateway.md) — pair a phone as a gateway
+- [API Reference](./docs/api-reference.md) — all REST endpoints
+- [Architecture](./docs/architecture.md) — how it fits together
+- [Deployment](./docs/deployment.md) — production with Docker + Nginx + SSL
+
+> ⚠️ **Before going public:** override the dev defaults (`ADMIN_PASSWORD`, `ENCRYPTION_KEY`, `JWT_SECRET`) and restrict CORS. See the [security checklist](./docs/configuration.md#-security-checklist-before-goingpublicproduction).
 
 ## License
 

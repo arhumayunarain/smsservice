@@ -1,0 +1,191 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Device {
+  id                String    @id @default(cuid())
+  name              String
+  registrationToken String    @unique
+  socketId          String?
+  online            Boolean   @default(false)
+  lastSeen          DateTime?
+  battery           Int?
+  simCarrier        String?
+  phoneNumber       String?
+  signalStrength    Int?
+  androidVersion    String?
+  appVersion        String?
+  networkType       String?
+  messageQueueCount Int       @default(0)
+  rateLimitMax      Int?
+  rateLimitUnit     String?
+  simSlot           Int?
+  sims              Json?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  messages          Message[]
+  campaigns         Campaign[]
+}
+
+model ApiKey {
+  id        String    @id @default(cuid())
+  name      String
+  keyHash   String    @unique
+  keyPrefix String
+  active    Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  lastUsed  DateTime?
+}
+
+model Admin {
+  id           String @id @default(cuid())
+  username     String @unique
+  passwordHash String
+}
+
+model Message {
+  id                     String             @id @default(cuid())
+  deviceId               String?
+  device                 Device?            @relation(fields: [deviceId], references: [id])
+  recipient              String
+  body                   String
+  status                 MessageStatus      @default(QUEUED)
+  error                  String?
+  sentAt                 DateTime?
+  deliveredAt            DateTime?
+  campaignId             String?
+  campaign               Campaign?          @relation(fields: [campaignId], references: [id])
+  queuedAt               DateTime?
+  outreachTransactionId  String?
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+  campaignRecipient      CampaignRecipient?
+}
+
+enum MessageStatus {
+  PENDING
+  QUEUED
+  SENT_TO_DEVICE
+  DELIVERED
+  FAILED
+}
+
+enum SendVia {
+  DEVICE
+  API
+}
+
+model Template {
+  id        String     @id @default(cuid())
+  name      String
+  body      String
+  variables String[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  campaigns Campaign[]
+}
+
+model Campaign {
+  id               String            @id @default(cuid())
+  name             String
+  templateId       String
+  template         Template          @relation(fields: [templateId], references: [id])
+  deviceId         String?
+  device           Device?           @relation(fields: [deviceId], references: [id])
+  sendVia          SendVia           @default(DEVICE)
+  status           CampaignStatus    @default(DRAFT)
+  scheduledAt      DateTime?
+  timezone         String?
+  scheduledJobId   String?
+  startedAt        DateTime?
+  completedAt      DateTime?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  recipients       CampaignRecipient[]
+  messages         Message[]
+  recipientListId  String?
+  recipientList    RecipientList?    @relation(fields: [recipientListId], references: [id], onDelete: SetNull)
+}
+
+model CampaignRecipient {
+  id          String   @id @default(cuid())
+  campaignId  String
+  campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  phoneNumber String
+  variables   Json
+  messageId   String?  @unique
+  message     Message? @relation(fields: [messageId], references: [id])
+  createdAt   DateTime @default(now())
+}
+
+enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  RUNNING
+  PAUSED
+  COMPLETED
+  ABORTED
+}
+
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model ImportJob {
+  id         String          @id @default(cuid())
+  campaignId String?
+  source     ImportSource
+  status     ImportJobStatus @default(PENDING)
+  fileName   String?
+  rowCount   Int?
+  errorCount Int?
+  error      String?
+  metadata   Json?
+  parsedData Json?
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+}
+
+enum ImportSource {
+  CSV
+  XLSX
+  SHEETS
+  POSTEX
+  LEOPARDS
+  MANUAL
+}
+
+model RecipientList {
+  id          String               @id @default(cuid())
+  name        String
+  source      ImportSource
+  description String?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  entries     RecipientListEntry[]
+  campaigns   Campaign[]
+}
+
+model RecipientListEntry {
+  id          String        @id @default(cuid())
+  listId      String
+  list        RecipientList @relation(fields: [listId], references: [id], onDelete: Cascade)
+  phoneNumber String
+  variables   Json          @default("{}")
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+enum ImportJobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}

@@ -1,0 +1,53 @@
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Node modules
+node_modules/
+apps/backend/node_modules/
+apps/dashboard/node_modules/
+
+# Build outputs
+apps/backend/dist/
+apps/dashboard/.next/
+apps/dashboard/out/
+
+# Prisma generated client (regenerated at build time)
+# apps/backend/node_modules/.prisma/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Docker volumes
+postgres_data/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Recipient data / PII — never commit phone lists or imports
+*.csv
+batch*/
+phones*
+
+# Claude / planning artifacts
+.claude/
+.planning/
+
+# Android
+android/.gradle/
+android/local.properties
+android/app/build/
+android/build/
+android/**/*.apk
+android/**/*.aab
+android/**/*.ap_
+android/**/*.dex
+android/captures/
+android/.externalNativeBuild/
+android/.cxx/
+android/*.keystore
